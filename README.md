@@ -1,5 +1,6 @@
 # Mathematics in Lean — my solutions
 ![build](https://github.com/ashm1tr/Mathematics-in-Lean-solutions/actions/workflows/build.yml/badge.svg)
+
 Working through [Mathematics in Lean](https://leanprover-community.github.io/mathematics_in_lean/)
 (Lean 4 + Mathlib). This is a clone of the
 [upstream repository](https://github.com/leanprover-community/mathematics_in_lean)
