@@ -36,7 +36,12 @@ variable (x y z : α)
 #check (sup_le : x ≤ z → y ≤ z → x ⊔ y ≤ z)
 
 example : x ⊓ y = y ⊓ x := by
-  sorry
+  apply le_antisymm
+  repeat
+    apply le_inf
+    · apply inf_le_right
+    apply inf_le_left
+
 
 example : x ⊓ y ⊓ z = x ⊓ (y ⊓ z) := by
   sorry
@@ -48,10 +53,18 @@ example : x ⊔ y ⊔ z = x ⊔ (y ⊔ z) := by
   sorry
 
 theorem absorb1 : x ⊓ (x ⊔ y) = x := by
-  sorry
+  apply le_antisymm
+  apply inf_le_left
+  have h₁ : x ≤ x ⊔ y := by apply le_sup_left
+  have h₂ : x≤ x := by apply le_refl
+  apply le_inf h₂ h₁
 
 theorem absorb2 : x ⊔ x ⊓ y = x := by
-  sorry
+  apply le_antisymm
+  · apply sup_le
+    · apply le_refl
+    apply inf_le_left
+  apply le_sup_left
 
 end
 
@@ -70,10 +83,12 @@ variable {α : Type*} [Lattice α]
 variable (a b c : α)
 
 example (h : ∀ x y z : α, x ⊓ (y ⊔ z) = x ⊓ y ⊔ x ⊓ z) : a ⊔ b ⊓ c = (a ⊔ b) ⊓ (a ⊔ c) := by
-  sorry
+  rw [h, @inf_comm _ _ (a ⊔ b), absorb1, @inf_comm _ _ (a ⊔ b), h, ← sup_assoc, @inf_comm _ _ c a,
+    absorb2, inf_comm]
 
 example (h : ∀ x y z : α, x ⊔ y ⊓ z = (x ⊔ y) ⊓ (x ⊔ z)) : a ⊓ (b ⊔ c) = a ⊓ b ⊔ a ⊓ c := by
-  sorry
+  rw [h, @sup_comm _ _ (a ⊓ b), absorb2, @sup_comm _ _ (a ⊓ b), h, ← inf_assoc, @sup_comm _ _ c a,
+    absorb1, sup_comm]
 
 end
 
@@ -87,13 +102,30 @@ variable (a b c : R)
 #check (mul_nonneg : 0 ≤ a → 0 ≤ b → 0 ≤ a * b)
 
 example (h : a ≤ b) : 0 ≤ b - a := by
-  sorry
+  have h₁ : -a + a ≤ -a + b := by
+    apply add_le_add_right
+    exact h
+  rw [add_comm, ← sub_eq_add_neg, sub_self, add_comm, ← sub_eq_add_neg] at h₁
+  exact h₁
+
 
 example (h: 0 ≤ b - a) : a ≤ b := by
-  sorry
+  rw [← add_zero a, ← sub_add_cancel b a, add_comm (b - a)]
+  apply add_le_add_right h
 
 example (h : a ≤ b) (h' : 0 ≤ c) : a * c ≤ b * c := by
-  sorry
+  have h₁ : 0 ≤ b - a := by
+    have h₂ : -a + a ≤ -a + b := by
+      apply add_le_add_right
+      exact h
+    rw [add_comm, ← sub_eq_add_neg, sub_self, add_comm, ← sub_eq_add_neg] at h₂
+    exact h₂
+  have h₃ : 0 ≤ (b - a) * c := by
+    apply mul_nonneg
+    exact h₁
+    exact h'
+  rw [sub_eq_add_neg, add_mul] at h₃
+  simpa using h₃
 
 end
 
@@ -106,7 +138,10 @@ variable (x y z : X)
 #check (dist_triangle x y z : dist x z ≤ dist x y + dist y z)
 
 example (x y : X) : 0 ≤ dist x y := by
-  sorry
+  have h₁ : dist x x ≤ dist x y + dist y x := by
+    apply dist_triangle x y x
+  rw [dist_self] at h₁
+  nth_rw 2 [dist_comm] at h₁
+  linarith
 
 end
-

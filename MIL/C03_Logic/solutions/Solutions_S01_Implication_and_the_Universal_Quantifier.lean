@@ -124,6 +124,12 @@ section
 
 open Function
 
+
+
+
+
+
+
 example {c : ℝ} (h : c ≠ 0) : Injective fun x ↦ c * x := by
   intro x₁ x₂ h'
   apply (mul_right_inj' h).mp h'

@@ -39,17 +39,57 @@ example : min a b = min b a := by
     apply min_le_left
 
 example : max a b = max b a := by
-  sorry
-example : min (min a b) c = min a (min b c) := by
-  sorry
-theorem aux : min a b + c ≤ min (a + c) (b + c) := by
-  sorry
-example : min a b + c = min (a + c) (b + c) := by
-  sorry
-#check (abs_add_le : ∀ a b : ℝ, |a + b| ≤ |a| + |b|)
+  apply le_antisymm
+  · show max a b ≤ max b a
+    apply max_le
+    · apply le_max_right
+    apply le_max_left
 
-example : |a| - |b| ≤ |a - b| :=
-  sorry
+
+  · show max b a ≤ max a b
+    apply max_le
+    · apply le_max_right
+    apply le_max_left
+
+example : min (min a b) c = min a (min b c) := by
+  exact min_assoc a b c
+
+#check add_neg_cancel_right
+theorem aux : min a b + c ≤ min (a + c) (b + c) := by
+  have h₁ : min a b + c≤ a + c := by
+    have h₂ : min a b ≤ a := by apply min_le_left
+    linarith
+  have h₃ : min a b + c ≤ b + c := by
+    have h₄ : min a b ≤ b := by apply min_le_right
+    linarith
+  apply le_min
+  exact h₁
+  exact h₃
+
+example : min a b + c = min (a + c) (b + c) := by
+  apply le_antisymm
+  · apply aux
+
+  have h₂ : min (a+c) (b+c) ≤ min a b + c := by
+    have h₁ : min (a+c) (b+c)+ - c ≤ min (a+c+-c) (b+c+-c) := by exact aux (a+c) (b+c) (-c)
+    repeat rw [add_neg_cancel_right] at h₁
+    linarith
+  exact h₂
+
+
+
+#check (abs_add_le : ∀ a b : ℝ, |a + b| ≤ |a| + |b|)
+#check add_sub_cancel_right
+#check sub_add_cancel
+
+
+example : |a| - |b| ≤ |a - b| := by
+  have h₁ : |a-b+b| ≤ |a-b| + |b| := by exact abs_add_le (a-b) b
+
+  rw [sub_add_cancel] at h₁
+  linarith
+
+
 end
 
 section
@@ -66,7 +106,27 @@ example : x ∣ x ^ 2 := by
   apply dvd_mul_left
 
 example (h : x ∣ w) : x ∣ y * (x * z) + x ^ 2 + w ^ 2 := by
-  sorry
+  have h₁ : x ∣ y * (x*z) := by
+    have h₂ : x ∣ x*z := by apply dvd_mul_right
+    nth_rw 2 [mul_comm]
+    rw [← mul_assoc]
+    apply dvd_mul_left
+  have h₃ : x ∣ x^2 := by apply dvd_mul_left
+  have h₄ : x ∣ w^2 := by
+    rw [pow_two]
+    apply dvd_mul_of_dvd_left
+    exact h
+  have h₅: x ∣ y * (x * z) + x ^ 2 := by
+    apply dvd_add h₁
+    exact h₃
+  have h₆: x ∣ y * (x * z) + x ^ 2 + w ^ 2:= by
+    apply dvd_add h₅
+    exact h₄
+  exact h₆
+
+#check dvd_add
+
+
 end
 
 section
@@ -78,7 +138,14 @@ variable (m n : ℕ)
 #check (Nat.lcm_zero_left n : Nat.lcm 0 n = 0)
 
 example : Nat.gcd m n = Nat.gcd n m := by
-  sorry
+  apply Nat.dvd_antisymm
+  repeat
+    apply Nat.dvd_gcd
+    apply Nat.gcd_dvd_right
+    apply Nat.gcd_dvd_left
+
 end
 
-
+#check dvd_antisymm
+#check dvd_trans
+#check gcd_dvd_left
