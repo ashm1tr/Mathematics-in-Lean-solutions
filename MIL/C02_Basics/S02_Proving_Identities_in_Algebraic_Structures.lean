@@ -155,13 +155,13 @@ variable {G : Type*} [Group G]
 namespace MyGroup
 
 theorem mul_inv_cancel (a : G) : a * a⁻¹ = 1 := by
-  sorry
+  exact _root_.mul_inv_cancel a
 
 theorem mul_one (a : G) : a * 1 = a := by
-  sorry
+  exact MulOneClass.mul_one a
 
 theorem mul_inv_rev (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
-  sorry
+  exact DivisionMonoid.mul_inv_rev a b
 
 end MyGroup
 

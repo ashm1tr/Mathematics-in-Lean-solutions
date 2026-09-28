@@ -158,10 +158,18 @@ example (of : FnOdd f) (og : FnOdd g) : FnEven fun x ↦ f x * g x := by
     _ = f (-x) * g (-x) := by ring
 
 example (ef : FnEven f) (og : FnOdd g) : FnOdd fun x ↦ f x * g x := by
-  sorry
+  intro x
+  calc
+    (fun x ↦ f x * g x) x = f x * g x := rfl
+    _ = f (-x) * -g (-x) := by rw [ef,og]
+    _ = - (f (-x) * g (-x)) := by ring
 
 example (ef : FnEven f) (og : FnOdd g) : FnEven fun x ↦ f (g x) := by
-  sorry
+  intro x
+  calc
+    (fun x ↦ f (g x)) x = f (g x) := by ring
+    _ = f ( - (- g (-x))) := by rw [ef,og]
+    _ = f (g (-x)) := by ring_nf
 
 end
 
@@ -176,9 +184,7 @@ example : s ⊆ s := by
 theorem Subset.refl : s ⊆ s := fun _x xs ↦ xs
 
 theorem Subset.trans : r ⊆ s → s ⊆ t → r ⊆ t := by
-  intro x xs
-  intro h
-  intro g
+  intro x xs h g
   exact Set.mem_of_subset_of_mem xs (x g)
 
 end
@@ -190,8 +196,10 @@ variable (s : Set α) (a b : α)
 def SetUb (s : Set α) (a : α) :=
   ∀ x, x ∈ s → x ≤ a
 
-example (h : SetUb s a) (h' : a ≤ b) : SetUb s b :=
-  sorry
+example (h : SetUb s a) (h' : a ≤ b) : SetUb s b := by
+  intro x xs
+  apply h at xs
+  apply le_trans xs h'
 
 end
 
@@ -204,12 +212,32 @@ example (c : ℝ) : Injective fun x ↦ x + c := by
   exact (add_left_inj c).mp h'
 
 example {c : ℝ} (h : c ≠ 0) : Injective fun x ↦ c * x := by
-  sorry
+  intro x₁ x₂ h'
+  have b: c * x₁ = c * x₂ := by
+    calc
+      c * x₁ = (fun x ↦ c * x) x₁ := by ring
+      _ = (fun x ↦ c * x) x₂ := by rw [h']
+      _ = c * x₂ := by ring
+  have d: x₁ = x₂ := by
+    calc
+      x₁ = (c*x₁)/c := by exact Eq.symm (mul_div_cancel_left₀ x₁ h)
+      _=(c* x₂)/c := by rw [b]
+      _ = x₂ := by exact mul_div_cancel_left₀ x₂ h
+  exact d
+
 
 variable {α : Type*} {β : Type*} {γ : Type*}
 variable {g : β → γ} {f : α → β}
 
 example (injg : Injective g) (injf : Injective f) : Injective fun x ↦ g (f x) := by
-  sorry
+  intro x₁ x₂ h'
+  have b: g (f x₁) = g (f x₂) := by
+    calc
+      g (f x₁) = (fun x ↦ g (f x)) x₁ := by ring_nf
+      _ = (fun x ↦ g (f x)) x₂ := by rw [h']
+      _ = g (f x₂) := by ring_nf
+  apply injg at b
+  apply injf at b
+  exact b
 
 end
