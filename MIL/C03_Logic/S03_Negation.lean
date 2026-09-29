@@ -112,7 +112,12 @@ example (h : ∀ x, ¬P x) : ¬∃ x, P x := by
   exact k ga
 
 example (h : ¬∀ x, P x) : ∃ x, ¬P x := by
-  sorry
+  by_contra h'
+  apply h
+  intro x
+  show P x
+  by_contra h''
+  exact h' ⟨x, h''⟩
 
 example (h : ∃ x, ¬P x) : ¬∀ x, P x := by
   intro g
@@ -133,7 +138,8 @@ example (h : ¬¬Q) : Q := by
   exact h h'
 
 example (h : Q) : ¬¬Q := by
-  sorry
+  intro g
+  exact g h
 
 end
 
@@ -141,19 +147,29 @@ section
 variable (f : ℝ → ℝ)
 
 example (h : ¬FnHasUb f) : ∀ a, ∃ x, f x > a := by
-  sorry
+  intro g
+  by_contra h'
+  apply h
+  show ∃ a, FnUb f a
+  have k: FnUb f g := by
+    push Not at h'
+    exact h'
+  use g
+
 
 example (h : ¬∀ a, ∃ x, f x > a) : FnHasUb f := by
-  push_neg at h
+  push Not at h
   exact h
 
 example (h : ¬FnHasUb f) : ∀ a, ∃ x, f x > a := by
   dsimp only [FnHasUb, FnUb] at h
-  push_neg at h
+  push Not at h
   exact h
 
 example (h : ¬Monotone f) : ∃ x y, x ≤ y ∧ f y < f x := by
-  sorry
+  dsimp only [Monotone] at h
+  push Not at h
+  exact h
 
 example (h : ¬FnHasUb f) : ∀ a, ∃ x, f x > a := by
   contrapose! h
