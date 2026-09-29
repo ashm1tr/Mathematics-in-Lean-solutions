@@ -186,7 +186,13 @@ variable {g : β → γ} {f : α → β}
 
 example (surjg : Surjective g) (surjf : Surjective f) : Surjective fun x ↦ g (f x) := by
   intro gx
-  sorry
-
+  dsimp
+  have k: ∃ x, g x = gx := by exact Set.mem_range.mp (surjg gx)
+  rcases k with ⟨m, gm⟩
+  have l: ∃ x, f x = m := by exact Set.mem_range.mp (surjf m)
+  rcases l with ⟨p, fp⟩
+  use p
+  rw [fp]
+  rw [gm]
 
 end
