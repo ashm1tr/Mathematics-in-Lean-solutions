@@ -114,15 +114,41 @@ example {x y : ℝ} (h : x ≤ y) : ¬y ≤ x ↔ x ≠ y := by
 example {x y : ℝ} (h : x ≤ y) : ¬y ≤ x ↔ x ≠ y :=
   ⟨fun h₀ h₁ ↦ h₀ (by rw [h₁]), fun h₀ h₁ ↦ h₀ (le_antisymm h h₁)⟩
 
-example {x y : ℝ} : x ≤ y ∧ ¬y ≤ x ↔ x ≤ y ∧ x ≠ y :=
-  sorry
+example {x y : ℝ} : x ≤ y ∧ ¬y ≤ x ↔ x ≤ y ∧ x ≠ y := by
+  constructor
+  intro g
+  have ⟨h₀,h₁⟩ := g
+  constructor
+  exact h₀
+  contrapose! h₁
+  linarith
+  intro k
+  have ⟨g₀,g₁⟩ := k
+  constructor
+  exact g₀
+  contrapose! g₁
+  linarith
 
-theorem aux {x y : ℝ} (h : x ^ 2 + y ^ 2 = 0) : x = 0 :=
-  have h' : x ^ 2 = 0 := by sorry
-  eq_zero_of_pow_eq_zero h'
+theorem aux {x y : ℝ} (h : x ^ 2 + y ^ 2 = 0) : x = 0 := by
+  have h' : x ^ 2 = 0 := by
+    have l: y^2 ≥ 0 := pow_two_nonneg y
+    have k: x^2 ≥ 0 := pow_two_nonneg x
+    linarith
 
-example (x y : ℝ) : x ^ 2 + y ^ 2 = 0 ↔ x = 0 ∧ y = 0 :=
-  sorry
+  apply eq_zero_of_pow_eq_zero h'
+
+example (x y : ℝ) : x ^ 2 + y ^ 2 = 0 ↔ x = 0 ∧ y = 0 := by
+  constructor
+  intro g
+  constructor
+  exact aux g
+  rw [add_comm] at g
+  exact aux g
+  intro h
+  have ⟨h₀,h₁⟩ := h
+  rw [h₀, h₁];linarith
+
+
 
 section
 
@@ -139,11 +165,14 @@ end
 
 theorem not_monotone_iff {f : ℝ → ℝ} : ¬Monotone f ↔ ∃ x y, x ≤ y ∧ f x > f y := by
   rw [Monotone]
-  push_neg
+  push Not
   rfl
 
 example : ¬Monotone fun x : ℝ ↦ -x := by
-  sorry
+  rw [Monotone]
+  push Not
+  use 1, 2
+  constructor <;> norm_num
 
 section
 variable {α : Type*} [PartialOrder α]
@@ -151,8 +180,22 @@ variable (a b : α)
 
 example : a < b ↔ a ≤ b ∧ a ≠ b := by
   rw [lt_iff_le_not_ge]
-  sorry
-
+  constructor
+  intro g
+  constructor
+  have ⟨h₀,_⟩ := g
+  exact h₀
+  have ⟨_,g₁⟩ := g
+  contrapose! g₁
+  exact Std.le_of_eq (id (Eq.symm g₁))
+  intro g
+  constructor
+  have ⟨h₀,h₁⟩ := g
+  exact h₀
+  intro j
+  have ⟨h₀,h₁⟩ := g
+  have k: a=b := by exact le_antisymm h₀ j
+  contradiction
 end
 
 section
