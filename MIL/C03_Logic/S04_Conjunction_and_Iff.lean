@@ -204,10 +204,19 @@ variable (a b c : α)
 
 example : ¬a < a := by
   rw [lt_iff_le_not_ge]
-  sorry
+  push Not
+  intro g
+  exact g
 
 example : a < b → b < c → a < c := by
   simp only [lt_iff_le_not_ge]
-  sorry
-
+  intro g j
+  have ⟨aleb,nblea⟩ := g
+  have ⟨blec,ncleb⟩ := j
+  have alec : a ≤ c := le_trans aleb blec
+  constructor
+  exact alec
+  intro m
+  have blea : b ≤ a := le_trans blec m
+  contradiction
 end
