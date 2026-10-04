@@ -11,6 +11,12 @@ example (h : y > x ^ 2) : y > 0 ∨ y < -1 := by
   left
   linarith [pow_two_nonneg x]
 
+example (h : y > x ^ 2) : y > 0 ∨ y < -1 := by
+  --practise
+  left
+  have j : x ^2 ≥ 0 := pow_two_nonneg x
+  linarith
+
 example (h : -y > x ^ 2 + 1) : y > 0 ∨ y < -1 := by
   right
   linarith [pow_two_nonneg x]
@@ -58,16 +64,46 @@ example : x < |y| → x < y ∨ x < -y := by
 namespace MyAbs
 
 theorem le_abs_self (x : ℝ) : x ≤ |x| := by
-  sorry
+  cases le_or_gt 0 x
+  case inl h =>
+    rw [abs_of_nonneg h]
+  case inr h =>
+    have k : |x| ≥ 0 := abs_nonneg x
+    linarith
 
 theorem neg_le_abs (x : ℝ) : -x ≤ |x| := by
-  sorry
+  rcases le_or_gt 0 x with h | g
+  · have k : -x ≤ 0 := by linarith
+    have j : |x| ≥ 0 := abs_nonneg x
+    linarith
+  · rw [abs_of_neg g]
 
 theorem abs_add_le (x y : ℝ) : |x + y| ≤ |x| + |y| := by
-  sorry
+  cases le_or_gt 0 (x+y)
+  case inl h =>
+    rw [abs_of_nonneg h]
+    linarith [le_abs_self x, le_abs_self y]
+  case inr h =>
+    rw [abs_of_neg h]
+    linarith [neg_le_abs x, neg_le_abs y]
+
 
 theorem lt_abs : x < |y| ↔ x < y ∨ x < -y := by
-  sorry
+  constructor
+  rcases le_or_gt 0 y with h | h
+  · rw [abs_of_nonneg h]
+    intro g
+    left
+    exact g
+  · rw [abs_of_neg h]
+    intro g;right;exact g
+  intro g
+  rcases g with g | g
+  · have h : y ≤ |y| := le_abs_self y
+    linarith
+  · have h : -y ≤ |y| := neg_le_abs y
+    linarith
+
 
 theorem abs_lt : |x| < y ↔ -y < x ∧ x < y := by
   sorry
@@ -94,10 +130,20 @@ example {z : ℝ} (h : ∃ x y, z = x ^ 2 + y ^ 2 ∨ z = x ^ 2 + y ^ 2 + 1) : z
   sorry
 
 example {x : ℝ} (h : x ^ 2 = 1) : x = 1 ∨ x = -1 := by
-  sorry
+  have h' : x ^ 2 - 1 = 0 := by rw [h, sub_self]
+  have g : (x + 1) * (x - 1) = 0 := by rw [← h']; ring
+  apply eq_zero_or_eq_zero_of_mul_eq_zero at g
+  rcases g with j | j
+  · right;linarith
+  · left;linarith
 
 example {x y : ℝ} (h : x ^ 2 = y ^ 2) : x = y ∨ x = -y := by
-  sorry
+  have h' : x ^ 2 - y^2 = 0 := by rw [h, sub_self]
+  have g : (x + y) * (x - y) = 0 := by rw [← h']; ring
+  apply eq_zero_or_eq_zero_of_mul_eq_zero at g
+  rcases g with j | j
+  · right;linarith
+  · left;linarith
 
 section
 variable {R : Type*} [CommRing R] [IsDomain R]
@@ -105,6 +151,7 @@ variable (x y : R)
 
 example (h : x ^ 2 = 1) : x = 1 ∨ x = -1 := by
   sorry
+
 
 example (h : x ^ 2 = y ^ 2) : x = y ∨ x = -y := by
   sorry
@@ -125,4 +172,3 @@ example (P : Prop) : ¬¬P → P := by
 
 example (P Q : Prop) : P → Q ↔ ¬P ∨ Q := by
   sorry
-
