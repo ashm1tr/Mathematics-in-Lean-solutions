@@ -127,7 +127,7 @@ example {m n k : ℕ} (h : m ∣ n ∨ m ∣ k) : m ∣ n * k := by
     apply dvd_mul_right
 
 example {z : ℝ} (h : ∃ x y, z = x ^ 2 + y ^ 2 ∨ z = x ^ 2 + y ^ 2 + 1) : z ≥ 0 := by
-  sorry
+  rcases h with ⟨x, y, rfl | rfl⟩ <;> linarith [sq_nonneg x, sq_nonneg y]
 
 example {x : ℝ} (h : x ^ 2 = 1) : x = 1 ∨ x = -1 := by
   have h' : x ^ 2 - 1 = 0 := by rw [h, sub_self]
@@ -150,11 +150,22 @@ variable {R : Type*} [CommRing R] [IsDomain R]
 variable (x y : R)
 
 example (h : x ^ 2 = 1) : x = 1 ∨ x = -1 := by
-  sorry
-
+  have h' : x ^ 2 - 1 = 0 := by rw [h, sub_self]
+  have g : (x + 1) * (x - 1) = 0 := by rw [← h']; ring
+  apply eq_zero_or_eq_zero_of_mul_eq_zero at g
+  rcases g with j | j
+  · right
+    exact eq_neg_iff_add_eq_zero.mpr j
+  · left
+    exact eq_of_sub_eq_zero j
 
 example (h : x ^ 2 = y ^ 2) : x = y ∨ x = -y := by
-  sorry
+  have h' : x ^ 2 - y^2 = 0 := by rw [h, sub_self]
+  have g : (x + y) * (x - y) = 0 := by rw [← h']; ring
+  apply eq_zero_or_eq_zero_of_mul_eq_zero at g
+  rcases g with j | j
+  · right; exact eq_neg_iff_add_eq_zero.mpr j
+  · left; exact eq_of_sub_eq_zero j
 
 end
 
@@ -171,4 +182,15 @@ example (P : Prop) : ¬¬P → P := by
   contradiction
 
 example (P Q : Prop) : P → Q ↔ ¬P ∨ Q := by
-  sorry
+  constructor
+  by_cases h' : Q
+  · intro g
+    right
+    assumption
+  · intro g
+    contrapose! g
+    exact g
+  · intro g h
+    contrapose! g
+    constructor
+    assumption;assumption
