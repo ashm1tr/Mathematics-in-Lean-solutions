@@ -7,7 +7,7 @@ def ConvergesTo (s : ℕ → ℝ) (a : ℝ) :=
   ∀ ε > 0, ∃ N, ∀ n ≥ N, |s n - a| < ε
 
 example : (fun x y : ℝ ↦ (x + y) ^ 2) = fun x y : ℝ ↦ x ^ 2 + 2 * x * y + y ^ 2 := by
-  ext
+  ext a b
   ring
 
 example (a b : ℝ) : |a| = |a - b + b| := by
@@ -35,7 +35,26 @@ theorem convergesTo_add {s t : ℕ → ℝ} {a b : ℝ}
   rcases cs (ε / 2) ε2pos with ⟨Ns, hs⟩
   rcases ct (ε / 2) ε2pos with ⟨Nt, ht⟩
   use max Ns Nt
-  sorry
+  have ksa : ∀ n ≥ max Ns Nt, |s n - a| < ε / 2 := by
+    intro k kl
+    have ks : k ≥ Ns := le_of_max_le_left kl
+    apply hs k
+    exact ks
+  have ksb : ∀ n ≥ max Ns Nt, |t n - b| < ε / 2 := by
+    intro k kl
+    have ks : k ≥ Nt := le_of_max_le_right kl
+    apply ht k
+    exact ks
+  intro g gl
+  have kag : |s g - a| < ε / 2 := ksa g gl
+  have kbg : |t g - b| < ε / 2 := ksb g gl
+  have sum: |s g - a| + |t g - b| < ε := by linarith
+  have tri: |(s g - a) + (t g - b)| ≤  |s g - a| + |t g - b| := by exact abs_add_le (s g - a) (t g - b)
+  have fin₀ : |s g - a + (t g - b)| < ε := by linarith
+  have fin₁: |s g + t g - (a+b)| = |s g - a + (t g - b)| := by congr;linarith
+  rw [fin₁]
+  congr
+
 
 theorem convergesTo_mul_const {s : ℕ → ℝ} {a : ℝ} (c : ℝ) (cs : ConvergesTo s a) :
     ConvergesTo (fun n ↦ c * s n) (c * a) := by
@@ -100,4 +119,3 @@ def ConvergesTo' (s : α → ℝ) (a : ℝ) :=
   ∀ ε > 0, ∃ N, ∀ n ≥ N, |s n - a| < ε
 
 end
-
