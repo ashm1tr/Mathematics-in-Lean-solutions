@@ -65,7 +65,18 @@ theorem convergesTo_mul_const {s : ℕ → ℝ} {a : ℝ} (c : ℝ) (cs : Conver
     rw [h]
     ring
   have acpos : 0 < |c| := abs_pos.mpr h
-  sorry
+  rw [ConvergesTo];rw [ConvergesTo] at cs
+  intro g gl
+  have gc : (g / |c|) > 0 := div_pos gl acpos
+  have ks : ∃ N, ∀ n ≥ N, |s n - a| < g / |c| := cs (g / |c|) gc
+  rcases ks with ⟨m, ml⟩
+  use m
+  intro b j
+  have pr : |s b - a| < g / |c| := ml b j
+  rw [lt_div_iff₀' acpos] at pr
+  rw [← abs_mul] at pr
+  rw [mul_sub] at pr
+  exact pr
 
 theorem exists_abs_le_of_convergesTo {s : ℕ → ℝ} {a : ℝ} (cs : ConvergesTo s a) :
     ∃ N b, ∀ n, N ≤ n → |s n| < b := by
