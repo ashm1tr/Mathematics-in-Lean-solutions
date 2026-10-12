@@ -97,16 +97,11 @@ theorem aux {s t : ℕ → ℝ} {a : ℝ} (cs : ConvergesTo s a) (ct : Converges
   rcases ct _ pos₀ with ⟨N₁, h₁⟩
   use (max N₁ N₀)
   intro g l
-  have ggen0 : g ≥ N₀ := by sorry
-  have ggen1 : g ≥ N₁ := by sorry
-  have sg : |s g| < B := h₀ g ggen0
-  have tg : |t g - 0| < ε / B := h₁ g ggen1
-  have tg' : |t g| < ε / B := by
-    rw [sub_zero (t g)] at tg
-    exact tg
+  have tg : |t g| < ε / B := by simpa using h₁ g (le_of_max_le_left l)
   norm_num
-  have alm : |s g| * |t g| < ε := by sorry
-  exact alm
+  rw [← mul_div_cancel₀ ε (ne_of_gt Bpos)]
+  exact mul_lt_mul'' (h₀ g (le_of_max_le_right l)) tg (abs_nonneg (s g)) (abs_nonneg (t g))
+
 
 
 theorem convergesTo_mul {s t : ℕ → ℝ} {a b : ℝ}
@@ -125,7 +120,17 @@ theorem convergesTo_unique {s : ℕ → ℝ} {a b : ℝ}
       (sa : ConvergesTo s a) (sb : ConvergesTo s b) :
     a = b := by
   by_contra abne
-  have : |a - b| > 0 := by sorry
+  have : |a - b| > 0 := by
+
+    have ambnz : a - b ≠ 0 := by
+      by_contra
+      have aeqb : a=b := by linarith
+      contradiction
+    have mod_n : |a-b| ≥ 0 := abs_nonneg (a-b)
+    rcases eq_or_lt_of_le mod_n with h | h
+    · have k : a-b=0 := abs_eq_zero.mp (Eq.symm h)
+      contradiction
+    · exact h
   let ε := |a - b| / 2
   have εpos : ε > 0 := by
     change |a - b| / 2 > 0
