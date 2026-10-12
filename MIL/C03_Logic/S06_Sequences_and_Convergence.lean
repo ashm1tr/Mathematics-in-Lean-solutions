@@ -82,7 +82,10 @@ theorem exists_abs_le_of_convergesTo {s : ℕ → ℝ} {a : ℝ} (cs : Converges
     ∃ N b, ∀ n, N ≤ n → |s n| < b := by
   rcases cs 1 zero_lt_one with ⟨N, h⟩
   use N, |a| + 1
-  sorry
+  intro g k
+  have j : |s g - a| < 1 := h g k
+  have m :|s g| - |a| ≤ |s g - a| := abs_sub_abs_le_abs_sub (s g) a
+  linarith
 
 theorem aux {s t : ℕ → ℝ} {a : ℝ} (cs : ConvergesTo s a) (ct : ConvergesTo t 0) :
     ConvergesTo (fun n ↦ s n * t n) 0 := by
@@ -92,7 +95,19 @@ theorem aux {s t : ℕ → ℝ} {a : ℝ} (cs : ConvergesTo s a) (ct : Converges
   have Bpos : 0 < B := lt_of_le_of_lt (abs_nonneg _) (h₀ N₀ (le_refl _))
   have pos₀ : ε / B > 0 := div_pos εpos Bpos
   rcases ct _ pos₀ with ⟨N₁, h₁⟩
-  sorry
+  use (max N₁ N₀)
+  intro g l
+  have ggen0 : g ≥ N₀ := by sorry
+  have ggen1 : g ≥ N₁ := by sorry
+  have sg : |s g| < B := h₀ g ggen0
+  have tg : |t g - 0| < ε / B := h₁ g ggen1
+  have tg' : |t g| < ε / B := by
+    rw [sub_zero (t g)] at tg
+    exact tg
+  norm_num
+  have alm : |s g| * |t g| < ε := by sorry
+  exact alm
+
 
 theorem convergesTo_mul {s t : ℕ → ℝ} {a b : ℝ}
       (cs : ConvergesTo s a) (ct : ConvergesTo t b) :
