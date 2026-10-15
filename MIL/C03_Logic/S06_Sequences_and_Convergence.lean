@@ -138,9 +138,18 @@ theorem convergesTo_unique {s : ℕ → ℝ} {a b : ℝ}
   rcases sa ε εpos with ⟨Na, hNa⟩
   rcases sb ε εpos with ⟨Nb, hNb⟩
   let N := max Na Nb
-  have absa : |s N - a| < ε := by sorry
-  have absb : |s N - b| < ε := by sorry
-  have : |a - b| < |a - b| := by sorry
+  have absa : |s N - a| < ε := hNa N (le_of_max_le_left (le_refl N))
+  have absb : |s N - b| < ε := hNb N (le_of_max_le_right (le_refl N))
+  have : |a - b| < |a - b| := by
+    change |s N - a| < |a - b| / 2 at absa
+    change |s N - b| < |a - b| / 2 at absb
+    have k : |s N - a| + |s N - b| < |a-b| := by
+      linarith
+    rw [← abs_neg (s N - a)] at k
+    simp at k
+    have j : |a - s N + (s N - b)| ≤ |a - s N| + |s N - b|:= abs_add_le (a - s N) (s N - b)
+    simp at j
+    linarith
   exact lt_irrefl _ this
 
 section
