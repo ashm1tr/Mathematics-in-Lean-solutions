@@ -69,7 +69,15 @@ example : (s \ t) \ u ⊆ s \ (t ∪ u) := by
   rintro (xt | xu) <;> contradiction
 
 example : s \ (t ∪ u) ⊆ (s \ t) \ u := by
-  sorry
+  rintro x ⟨xs, xn⟩
+  simp
+  constructor
+  constructor
+  exact xs
+  contrapose! xn
+  exact mem_union_left u xn
+  contrapose! xn
+  exact mem_union_right t xn
 example : s ∩ t = t ∩ s := by
   ext x
   simp only [mem_inter_iff]
@@ -88,7 +96,7 @@ example : s ∩ t = t ∩ s := by
   · rintro x ⟨xt, xs⟩; exact ⟨xs, xt⟩
 
 example : s ∩ t = t ∩ s :=
-    Subset.antisymm sorry sorry
+  Subset.antisymm (fun _x ⟨xs, xt⟩ ↦ ⟨xt, xs⟩) (fun _x ⟨xt, xs⟩ ↦ ⟨xs, xt⟩)
 example : s ∩ (s ∪ t) = s := by
   sorry
 
