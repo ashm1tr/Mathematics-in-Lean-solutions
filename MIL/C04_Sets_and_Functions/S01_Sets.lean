@@ -98,10 +98,30 @@ example : s ∩ t = t ∩ s := by
 example : s ∩ t = t ∩ s :=
   Subset.antisymm (fun _x ⟨xs, xt⟩ ↦ ⟨xt, xs⟩) (fun _x ⟨xt, xs⟩ ↦ ⟨xs, xt⟩)
 example : s ∩ (s ∪ t) = s := by
-  sorry
+  ext x
+  simp only [mem_inter_iff]
+  constructor
+  · rintro ⟨xs,xt⟩
+    exact xs
+  · intro g
+    constructor; exact g
+    exact mem_union_left t g
+
+
 
 example : s ∪ s ∩ t = s := by
-  sorry
+  ext x
+  constructor
+  · intro g
+    rcases g with xs | xt; exact xs
+    simp only [mem_inter_iff] at xt
+    exact xt.1
+  · intro g
+    simp only [mem_union]
+    exact Or.symm (Or.inr g)
+
+
+  --simp only [mem_inter_iff]
 
 example : s \ t ∪ t = s ∪ t := by
   sorry
