@@ -124,10 +124,54 @@ example : s ∪ s ∩ t = s := by
   --simp only [mem_inter_iff]
 
 example : s \ t ∪ t = s ∪ t := by
-  sorry
+  ext x
+  constructor
+  · intro g
+    rcases g with xst | xt
+    · have xs : x ∈ s := xst.1
+      exact mem_union_left t xs
+    · exact mem_union_right s xt
+  · intro g
+    rcases g with xs | xt
+    · by_cases h : x ∈ t
+      · exact mem_union_right (s \ t) h
+      · have xst : x ∈ s \ t := mem_diff_of_mem xs h
+        exact mem_union_left t xst
+    · exact mem_union_right (s \ t ) xt
+
+
+
 
 example : s \ t ∪ t \ s = (s ∪ t) \ (s ∩ t) := by
-  sorry
+  ext x
+  constructor
+  · intro g
+    rcases g with xst | xts
+    · have xs : x ∈ s := xst.1
+      have xnt : x ∉ t := xst.2
+      constructor
+      · exact mem_union_left t xs
+      · intro h
+        exact xnt h.2
+    · have xt : x ∈ t := xts.1
+      have xns : x ∉ s := xts.2
+      constructor
+      · exact mem_union_right s xt
+      · intro h
+        exact xns h.1
+  · intro g
+    rcases g with ⟨xst, xnst⟩
+    rcases xst with xs | xt
+    · have xnt : x ∉ t := by
+        intro xt
+        exact xnst ⟨xs, xt⟩
+      have xst : x ∈ s \ t := mem_diff_of_mem xs xnt
+      exact mem_union_left (t \ s) xst
+    · have xns : x ∉ s := by
+        intro xs
+        exact xnst ⟨xs, xt⟩
+      have xts : x ∈ t \ s := mem_diff_of_mem xt xns
+      exact mem_union_right (s \ t) xts
 
 def evens : Set ℕ :=
   { n | Even n }
@@ -148,7 +192,13 @@ example (x : ℕ) : x ∈ (univ : Set ℕ) :=
   trivial
 
 example : { n | Nat.Prime n } ∩ { n | n > 2 } ⊆ { n | ¬Even n } := by
-  sorry
+  intro n g
+  simp at g
+  have ⟨np, n2⟩ := g
+  rcases Nat.Prime.eq_two_or_odd np with ntwo | nodd
+  · contrapose! ntwo
+    exact Ne.symm (Nat.ne_of_lt n2)
+  · exact Nat.not_even_iff.mpr nodd
 
 #print Prime
 
