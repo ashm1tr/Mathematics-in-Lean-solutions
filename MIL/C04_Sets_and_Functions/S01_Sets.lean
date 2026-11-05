@@ -234,10 +234,15 @@ section
 variable (ssubt : s ⊆ t)
 
 example (h₀ : ∀ x ∈ t, ¬Even x) (h₁ : ∀ x ∈ t, Prime x) : ∀ x ∈ s, ¬Even x ∧ Prime x := by
-  sorry
+  intro x xs
+  have xt : x∈ t := ssubt xs
+  constructor
+  · apply h₀ x xt
+  apply h₁ x xt
 
 example (h : ∃ x ∈ s, ¬Even x ∧ Prime x) : ∃ x ∈ t, Prime x := by
-  sorry
+  rcases h with ⟨x,xs,_,px⟩
+  use x, ssubt xs
 
 end
 
@@ -276,7 +281,22 @@ example : (⋂ i, A i ∩ B i) = (⋂ i, A i) ∩ ⋂ i, B i := by
 
 
 example : (s ∪ ⋂ i, A i) = ⋂ i, A i ∪ s := by
-  sorry
+  ext x
+  simp only [mem_iInter, mem_union]
+  constructor
+  · intro h
+    · intro y
+      by_cases g : x∈ s
+      · exact Or.inr g
+      have k : ∀ (i : I), x ∈ A i := Or.resolve_left h g
+      exact Or.inl (k y)
+  · intro g
+    by_cases h : x ∈ s
+    exact Or.inl h
+    right
+    intro i
+    exact Or.resolve_right (g i) h
+
 
 def primes : Set ℕ :=
   { x | Nat.Prime x }
