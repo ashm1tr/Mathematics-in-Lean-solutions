@@ -13,11 +13,11 @@ variable (u v : Set β)
 open Function
 open Set
 
-example : f ⁻¹' (u ∩ v) = f ⁻¹' u ∩ f ⁻¹' v := by
+example : f ⁻¹' (u ∩ v) = f ⁻¹' u ∩ f ⁻¹' v := by -- f ⁻¹' is preimage
   ext
   rfl
 
-example : f '' (s ∪ t) = f '' s ∪ f '' t := by
+example : f '' (s ∪ t) = f '' s ∪ f '' t := by --f '' is the image
   ext y; constructor
   · rintro ⟨x, xs | xt, rfl⟩
     · left
@@ -34,10 +34,24 @@ example : s ⊆ f ⁻¹' (f '' s) := by
   use x, xs
 
 example : f '' s ⊆ v ↔ s ⊆ f ⁻¹' v := by
-  sorry
+  constructor
+  · intro h y ys
+    simp at h
+    exact h ys
+  intro h y yfs
+  simp at yfs
+  rcases yfs with ⟨z, zs, fzy⟩
+  rw [subset_def] at h
+  have g : z ∈ f ⁻¹' v := h z zs
+  simp at g
+  rwa [fzy] at g
+
 
 example (h : Injective f) : f ⁻¹' (f '' s) ⊆ s := by
-  sorry
+  rintro gfs ⟨y,ys,fyg⟩
+  apply h at fyg
+  rwa [fyg] at ys
+
 
 example : f '' (f ⁻¹' u) ⊆ u := by
   sorry
